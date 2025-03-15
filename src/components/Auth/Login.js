@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Container, Paper, Typography, TextField, Button, Box, InputAdornment } from "@mui/material";
 import { PersonOutline, LockOutlined } from "@mui/icons-material";
 import API from "../../api";
+import { Link } from "react-router-dom";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -129,9 +130,9 @@ const Login = () => {
         <Box className="mt-6 text-center">
           <Typography variant="body2" className="text-gray-600">
             Don't have an account?{" "}
-            <a href="/register" className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
+            <Link to="/register" className="text-indigo-600 hover:text-indigo-800 font-medium transition-colors">
               Register
-            </a>
+            </Link>
           </Typography>
         </Box>
       </Paper>
