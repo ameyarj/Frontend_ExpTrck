@@ -2,7 +2,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'https://backend-exptrck.onrender.com/api',  
+  baseURL: process.env.REACT_APP_API_URL || 'https://backend-exptrck.onrender.com/api',
 });
 
 API.interceptors.request.use((config) => {
