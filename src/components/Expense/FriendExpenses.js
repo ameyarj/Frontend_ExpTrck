@@ -71,7 +71,6 @@ const FriendExpenses = () => {
     }
   };
 
-  // Reset state when clearing the friend selection
   const handleFriendChange = (event, newValue) => {
     setSelectedFriend(newValue);
     if (!newValue) {

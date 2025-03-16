@@ -1,4 +1,3 @@
-// src/components/Auth/Register.js
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Container, Paper, Typography, TextField, Button, Box, InputAdornment } from "@mui/material";
@@ -18,11 +17,8 @@ const Register = () => {
     e.preventDefault();
     try {
       const response = await API.post("/auth/register/", formData);
-      // Store the token in localStorage
       localStorage.setItem("token", response.data.token);
-      // Store user data if needed
       localStorage.setItem("user", JSON.stringify(response.data.user));
-      // Update the API instance with the new token
       API.defaults.headers.common["Authorization"] = `Token ${response.data.token}`;
       navigate("/login");
     } catch (err) {
