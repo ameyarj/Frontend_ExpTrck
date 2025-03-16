@@ -31,6 +31,7 @@ const FriendExpenses = () => {
   const [expenses, setExpenses] = useState([]);
   const [balanceWithFriend, setBalanceWithFriend] = useState(null);
   const [error, setError] = useState("");
+  const [hasSearched, setHasSearched] = useState(false);
 
   useEffect(() => {
     const fetchFriends = async () => {
@@ -63,9 +64,20 @@ const FriendExpenses = () => {
       setExpenses(expensesRes.data);
       setBalanceWithFriend(balanceRes.data);
       setError("");
+      setHasSearched(true);
     } catch (err) {
       console.error("Error fetching friend expenses", err);
       setError("Failed to fetch friend expenses.");
+    }
+  };
+
+  // Reset state when clearing the friend selection
+  const handleFriendChange = (event, newValue) => {
+    setSelectedFriend(newValue);
+    if (!newValue) {
+      setExpenses([]);
+      setBalanceWithFriend(null);
+      setHasSearched(false);
     }
   };
 
@@ -245,7 +257,7 @@ const FriendExpenses = () => {
               options={friendOptions}
               getOptionLabel={(option) => option.username}
               value={selectedFriend}
-              onChange={(event, newValue) => setSelectedFriend(newValue)}
+              onChange={handleFriendChange}
               sx={{ flexGrow: 1 }}
               renderInput={(params) => (
                 <TextField
@@ -379,7 +391,7 @@ const FriendExpenses = () => {
                 {expenses.map((expense) => renderExpenseDetails(expense))}
               </List>
             </>
-          ) : selectedFriend ? (
+          ) : hasSearched && selectedFriend ? (
             <Box 
               sx={{ 
                 textAlign: "center", 
