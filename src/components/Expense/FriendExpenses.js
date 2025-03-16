@@ -12,10 +12,18 @@ import {
   Grid,
   Card,
   CardContent,
+  Divider,
+  Chip,
 } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import API from "../../api";
 import NavigationBar from "../NavigationBar";
+import PersonOutlineIcon from "@mui/icons-material/PersonOutline";
+import AccountBalanceWalletOutlinedIcon from "@mui/icons-material/AccountBalanceWalletOutlined";
+import EventNoteOutlinedIcon from "@mui/icons-material/EventNoteOutlined";
+import SearchIcon from "@mui/icons-material/Search";
+import ReceiptLongOutlinedIcon from "@mui/icons-material/ReceiptLongOutlined";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 
 const FriendExpenses = () => {
   const [selectedFriend, setSelectedFriend] = useState(null);
@@ -62,61 +70,140 @@ const FriendExpenses = () => {
   };
 
   const renderExpenseDetails = (expense) => (
-    <Card sx={{ mb: 2 }} key={expense.id}>
-      <CardContent>
-        <Typography variant="h6">{expense.title}</Typography>
-        <Typography variant="body2" color="textSecondary" gutterBottom>
-          {expense.description}
-        </Typography>
+    <Card 
+      sx={{ 
+        mb: 3, 
+        borderRadius: 2, 
+        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+        transition: "transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out",
+        "&:hover": {
+          transform: "translateY(-4px)",
+          boxShadow: "0 8px 16px rgba(0,0,0,0.12)",
+        }
+      }} 
+      key={expense.id}
+    >
+      <CardContent sx={{ p: 3 }}>
+        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", mb: 2 }}>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>{expense.title}</Typography>
+          <Chip 
+            icon={<AttachMoneyIcon />} 
+            label={`$${expense.total_amount}`} 
+            color="primary" 
+            variant="outlined" 
+            sx={{ fontWeight: "bold" }}
+          />
+        </Box>
         
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={6}>
-            <Typography variant="subtitle2">Total Amount: ${expense.total_amount}</Typography>
-            <Typography variant="subtitle2">Tax Amount: ${expense.tax_amount}</Typography>
+        {expense.description && (
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            {expense.description}
+          </Typography>
+        )}
+        
+        <Divider sx={{ my: 2 }} />
+        
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <PersonOutlineIcon sx={{ mr: 1, color: "primary.main" }} />
+              <Typography variant="body2">
+                Created by: <b>{expense.created_by.username}</b>
+              </Typography>
+            </Box>
           </Grid>
-          <Grid item xs={6}>
-            <Typography variant="subtitle2">
-              Created by: {expense.created_by.username}
-            </Typography>
-            <Typography variant="subtitle2">
-              Date: {new Date(expense.created_at).toLocaleDateString()}
-            </Typography>
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+              <EventNoteOutlinedIcon sx={{ mr: 1, color: "primary.main" }} />
+              <Typography variant="body2">
+                Date: <b>{new Date(expense.created_at).toLocaleDateString()}</b>
+              </Typography>
+            </Box>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <AccountBalanceWalletOutlinedIcon sx={{ mr: 1, color: "primary.main" }} />
+              <Typography variant="body2">
+                Tax: <b>${expense.tax_amount}</b>
+              </Typography>
+            </Box>
           </Grid>
         </Grid>
 
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle1">Items:</Typography>
-          <List dense>
-            {expense.items.map((item) => (
-              <ListItem key={item.id}>
-                <ListItemText
-                  primary={item.name}
-                  secondary={
-                    <>
-                      Amount: ${item.amount}
-                      {item.is_shared ? 
-                        " (Shared equally)" : 
-                        ` (Assigned to: ${item.assigned_to?.username})`}
-                    </>
-                  }
-                />
-              </ListItem>
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, display: "flex", alignItems: "center" }}>
+          <ReceiptLongOutlinedIcon sx={{ mr: 1, fontSize: 20 }} />
+          Items
+        </Typography>
+        <Box sx={{ backgroundColor: "rgba(0,0,0,0.02)", borderRadius: 1, p: 1 }}>
+          <List dense disablePadding>
+            {expense.items.map((item, index) => (
+              <React.Fragment key={item.id}>
+                {index > 0 && <Divider component="li" sx={{ my: 1 }} />}
+                <ListItem disableGutters>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>{item.name}</Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>${item.amount}</Typography>
+                      </Box>
+                    }
+                    secondary={
+                      <Typography variant="caption" color="text.secondary">
+                        {item.is_shared ? 
+                          "Shared equally" : 
+                          `Assigned to: ${item.assigned_to?.username}`}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              </React.Fragment>
             ))}
           </List>
         </Box>
 
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="subtitle1">Shares:</Typography>
-          <List dense>
-            {expense.shares.map((share) => (
-              <ListItem key={share.id}>
-                <ListItemText
-                  primary={`${share.participant.username}: $${share.amount}`}
-                  secondary={`${share.paid_by ? "Paid" : "Owes"} | ${
-                    share.settled ? "Settled" : "Pending"
-                  }`}
-                />
-              </ListItem>
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 1, display: "flex", alignItems: "center" }}>
+          <PersonOutlineIcon sx={{ mr: 1, fontSize: 20 }} />
+          Shares
+        </Typography>
+        <Box sx={{ backgroundColor: "rgba(0,0,0,0.02)", borderRadius: 1, p: 1 }}>
+          <List dense disablePadding>
+            {expense.shares.map((share, index) => (
+              <React.Fragment key={share.id}>
+                {index > 0 && <Divider component="li" sx={{ my: 1 }} />}
+                <ListItem disableGutters>
+                  <ListItemText
+                    primary={
+                      <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+                        <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                          {share.participant.username}
+                        </Typography>
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>${share.amount}</Typography>
+                      </Box>
+                    }
+                    secondary={
+                      <Box sx={{ display: "flex", gap: 1, mt: 0.5 }}>
+                        <Chip 
+                          label={share.paid_by ? "Paid" : "Owes"} 
+                          size="small"
+                          color={share.paid_by ? "success" : "warning"}
+                          sx={{ height: 20, fontSize: '0.7rem' }}
+                        />
+                        <Chip 
+                          label={share.settled ? "Settled" : "Pending"} 
+                          size="small"
+                          color={share.settled ? "success" : "default"}
+                          variant={share.settled ? "filled" : "outlined"}
+                          sx={{ height: 20, fontSize: '0.7rem' }}
+                        />
+                      </Box>
+                    }
+                  />
+                </ListItem>
+              </React.Fragment>
             ))}
           </List>
         </Box>
@@ -127,77 +214,190 @@ const FriendExpenses = () => {
   return (
     <>
       <NavigationBar />
-      <Container sx={{ mt: 4 }}>
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h4" gutterBottom>
+      <Container maxWidth="md" sx={{ mt: 5, mb: 8 }}>
+        <Paper 
+          elevation={3}
+          sx={{ 
+            p: 4, 
+            borderRadius: 3,
+            backgroundImage: "linear-gradient(to bottom, #f9fafc, #ffffff)"
+          }}
+        >
+          <Typography 
+            variant="h4" 
+            gutterBottom 
+            sx={{ 
+              fontWeight: 700, 
+              color: "primary.main",
+              mb: 3
+            }}
+          >
             Friend Expenses
           </Typography>
           
-          <Autocomplete
-            options={friendOptions}
-            getOptionLabel={(option) => option.username}
-            value={selectedFriend}
-            onChange={(event, newValue) => setSelectedFriend(newValue)}
-            renderInput={(params) => (
-              <TextField
-                {...params}
-                label="Select Friend"
-                variant="outlined"
-                margin="normal"
-                fullWidth
-              />
-            )}
-          />
+          <Box sx={{ 
+            display: "flex", 
+            gap: 2, 
+            alignItems: "stretch",
+            flexDirection: { xs: "column", sm: "row" } 
+          }}>
+            <Autocomplete
+              options={friendOptions}
+              getOptionLabel={(option) => option.username}
+              value={selectedFriend}
+              onChange={(event, newValue) => setSelectedFriend(newValue)}
+              sx={{ flexGrow: 1 }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Select Friend"
+                  variant="outlined"
+                  fullWidth
+                  InputProps={{
+                    ...params.InputProps,
+                    startAdornment: (
+                      <>
+                        <PersonOutlineIcon color="action" sx={{ ml: 1, mr: -0.5 }} />
+                        {params.InputProps.startAdornment}
+                      </>
+                    ),
+                  }}
+                />
+              )}
+            />
+            
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleFetchExpenses}
+              sx={{ 
+                minWidth: { xs: "100%", sm: "160px" },
+                borderRadius: 2,
+                py: 1.5,
+                fontWeight: 600,
+                boxShadow: 2
+              }}
+              startIcon={<SearchIcon />}
+            >
+              Find Expenses
+            </Button>
+          </Box>
           
           {error && (
-            <Typography color="error" sx={{ mb: 2 }}>
+            <Typography 
+              color="error" 
+              sx={{ 
+                mt: 2, 
+                p: 1.5, 
+                bgcolor: "error.light", 
+                color: "error.dark",
+                borderRadius: 1,
+                fontWeight: 500,
+                opacity: 0.9
+              }}
+            >
               {error}
             </Typography>
           )}
-          
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={handleFetchExpenses}
-            sx={{ mt: 2, mb: 4 }}
-          >
-            Fetch Expenses
-          </Button>
 
           {balanceWithFriend && (
-            <Paper sx={{ p: 2, mb: 4, backgroundColor: '#f5f5f5' }}>
-              <Typography variant="h6" gutterBottom>
-                Balance with {selectedFriend.username}
-              </Typography>
-              <Grid container spacing={2}>
-                <Grid item xs={12}>
-                  <Typography variant="h5" color={balanceWithFriend.total_balance >= 0 ? 'success.main' : 'error.main'}>
-                    Net Balance: ${balanceWithFriend.total_balance}
-                  </Typography>
+            <Card 
+              sx={{ 
+                mt: 4, 
+                mb: 4, 
+                borderRadius: 2,
+                overflow: "hidden",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.08)"
+              }}
+            >
+              <Box sx={{ bgcolor: "primary.main", p: 2, color: "white" }}>
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  Balance with {selectedFriend.username}
+                </Typography>
+              </Box>
+              <CardContent sx={{ p: 3 }}>
+                <Grid container spacing={3} alignItems="center">
+                  <Grid item xs={12} textAlign="center">
+                    <Typography 
+                      variant="h4" 
+                      sx={{ 
+                        fontWeight: 700,
+                        color: balanceWithFriend.total_balance >= 0 ? 'success.main' : 'error.main',
+                        mb: 2
+                      }}
+                    >
+                      ${balanceWithFriend.total_balance}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                      Net Balance
+                    </Typography>
+                    <Divider />
+                  </Grid>
+                  
+                  <Grid item xs={6}>
+                    <Box 
+                      sx={{ 
+                        p: 2, 
+                        borderRadius: 2, 
+                        bgcolor: "success.light",
+                        textAlign: "center"
+                      }}
+                    >
+                      <Typography variant="body2" color="success.dark">They owe you</Typography>
+                      <Typography variant="h6" color="success.dark" sx={{ fontWeight: 600 }}>
+                        ${balanceWithFriend.total_due_to_user}
+                      </Typography>
+                    </Box>
+                  </Grid>
+                  
+                  <Grid item xs={6}>
+                    <Box 
+                      sx={{ 
+                        p: 2, 
+                        borderRadius: 2, 
+                        bgcolor: "error.light",
+                        textAlign: "center"
+                      }}
+                    >
+                      <Typography variant="body2" color="error.dark">You owe them</Typography>
+                      <Typography variant="h6" color="error.dark" sx={{ fontWeight: 600 }}>
+                        ${balanceWithFriend.total_user_owes}
+                      </Typography>
+                    </Box>
+                  </Grid>
                 </Grid>
-                <Grid item xs={6}>
-                  <Typography color="success.main">
-                    They owe you: ${balanceWithFriend.total_due_to_user}
-                  </Typography>
-                </Grid>
-                <Grid item xs={6}>
-                  <Typography color="error.main">
-                    You owe them: ${balanceWithFriend.total_user_owes}
-                  </Typography>
-                </Grid>
-              </Grid>
-            </Paper>
+              </CardContent>
+            </Card>
           )}
 
-          <List>
-            {expenses.length > 0 ? (
-              expenses.map((expense) => renderExpenseDetails(expense))
-            ) : (
-              <Typography variant="body1" sx={{ mt: 2 }}>
+          {expenses.length > 0 ? (
+            <>
+              <Typography variant="h6" sx={{ mt: 4, mb: 2, fontWeight: 500 }}>
+                Expense History
+              </Typography>
+              <List>
+                {expenses.map((expense) => renderExpenseDetails(expense))}
+              </List>
+            </>
+          ) : selectedFriend ? (
+            <Box 
+              sx={{ 
+                textAlign: "center", 
+                py: 6, 
+                px: 2,
+                mt: 4,
+                bgcolor: "rgba(0,0,0,0.02)",
+                borderRadius: 2
+              }}
+            >
+              <Typography variant="body1" color="text.secondary">
                 No expenses found with this friend.
               </Typography>
-            )}
-          </List>
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Try selecting a different friend or creating a new expense.
+              </Typography>
+            </Box>
+          ) : null}
         </Paper>
       </Container>
     </>

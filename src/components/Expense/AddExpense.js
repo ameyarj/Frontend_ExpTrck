@@ -57,6 +57,16 @@ const ExpenseForm = () => {
 
   const steps = ['Basic Information', 'Participants', 'Items Breakdown'];
 
+  const validateItemsTotal = () => {
+    const itemsTotal = items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+    const totalAmount = parseFloat(formData.total_amount) || 0;
+    
+    if (Math.abs(itemsTotal - totalAmount) > 0.01) { // Allow small rounding differences
+      return `Items total (${itemsTotal.toFixed(2)}) must equal the expense total (${totalAmount.toFixed(2)})`;
+    }
+    return null;
+  };
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -95,6 +105,11 @@ const ExpenseForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage(""); 
+    const validationError = validateItemsTotal();
+    if (validationError) {
+      setMessage(validationError);
+      return;
+    }
     const currentUser = JSON.parse(localStorage.getItem("user"));
   
     const participantsArray = selectedParticipants.map((user) => user.id);
@@ -139,6 +154,13 @@ const ExpenseForm = () => {
   };
 
   const handleNext = () => {
+    if (activeStep === 2) {
+      const validationError = validateItemsTotal();
+      if (validationError) {
+        setMessage(validationError);
+        return;
+      }
+    }
     setActiveStep((prevStep) => prevStep + 1);
   };
 
@@ -291,11 +313,31 @@ const ExpenseForm = () => {
           </Box>
         );
       case 2:
+        const itemsTotal = items.reduce((sum, item) => sum + (parseFloat(item.amount) || 0), 0);
+        const totalAmount = parseFloat(formData.total_amount) || 0;
+        const difference = totalAmount - itemsTotal;
         return (
           <Box className="p-4">
             <Typography variant="h6" className="mb-4 flex items-center gap-2">
               <ShoppingCart className="text-indigo-600" /> Expense Items
             </Typography>
+      
+          <Box className="mb-4 p-3 bg-blue-50 rounded-lg">
+            <Typography variant="subtitle2" className="font-medium">
+              Total Amount: ${totalAmount.toFixed(2)}
+            </Typography>
+            <Typography variant="subtitle2" className="font-medium">
+              Items Total: ${itemsTotal.toFixed(2)}
+            </Typography>
+            <Typography 
+              variant="subtitle2" 
+              className={`font-medium ${Math.abs(difference) > 0.01 ? 'text-red-600' : 'text-green-600'}`}
+            >
+              {Math.abs(difference) > 0.01 ? 
+                `Difference: $${difference.toFixed(2)} (must be zero)` : 
+                "✓ Amounts match"}
+            </Typography>
+          </Box>
             <Box className="mb-4">
               <Button
                 variant="outlined"
